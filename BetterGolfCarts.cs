@@ -31,7 +31,6 @@ public class BetterGolfCarts : SonsMod
     {
         // Do your early mod initialization which doesn't involve game or sdk references here
         Config.Init();
-        ClassInjector.RegisterTypeInIl2Cpp<BetterGolfCartManager>();
     }
 
     protected override void OnSdkInitialized()
@@ -94,66 +93,34 @@ public static class GolfCartController_Start_Patch
     [HarmonyPostfix]
     public static void Postfix(GolfCartController __instance)
     {
-            BetterGolfCartManager.RegisterCart(__instance);
+        BetterGolfCartManager.RegisterCart(__instance);
     }
 }
 
-//public class BetterGolfCartLightController : MonoBehaviour
-//{
-//    private GolfCartController _cart;
-//    private HDAdditionalLightData _hdData;
-//    private bool _isHighBeamActive = false;
-//    private bool _isInitialized = false;
+[HarmonyPatch(typeof(PlayerGolfCartDriverAction), nameof(PlayerGolfCartDriverAction.PostInitialize))]
+public static class GolfCart_Entry_Patch
+{
+    [HarmonyPostfix]
+    public static void Postfix(GolfCartController __0)
+    {
+        if (__0 != null)
+        {
+            BetterGolfCartManager.LocalPlayerCart = __0;
+            Msg("LocalPlayerCart succesvol geregistreerd via PlayerGolfCartDriverAction!");
+        }
+    }
+}
 
-//    public void Setup(GolfCartController cart, HDAdditionalLightData hdData)
-//    {
-//        _cart = cart;
-//        _hdData = hdData;
-//        _isInitialized = true;
-//    }
-
-//    private void Update()
-//    {
-//        // Guard clause: don't run Update until Setup() is called
-//        if (!_isInitialized || _cart == null || _hdData == null) return;
-
-//        if (Input.GetKeyDown(Config.Highbeams.Value))
-//        {
-//            Msg("Enable highbeams!");
-//            ToggleHighBeam();
-//        }
-//    }
-
-//    private void ToggleHighBeam()
-//    {
-//        _isHighBeamActive = !_isHighBeamActive;
-
-//        if (_isHighBeamActive)
-//        {
-//            // Groot licht: Fel, smal en ver schijnend
-//            _hdData.SetIntensity(Config.HeadlightIntensity.Value * 2, LightUnit.Lumen);
-//            _hdData.SetSpotAngle(60f);
-//            _hdData.shadowFadeDistance = 400f; // Voorkomt zwarte vlekken in de verte
-//            _hdData.volumetricDimmer = 1f;
-//        }
-//        else
-//        {
-//            ApplyConfigValues();
-//        }
-
-//        _hdData.UpdateAllLightValues();
-//    }
-
-//    public void ApplyConfigValues()
-//    {
-//        if (_hdData == null) return;
-
-//        _hdData.SetIntensity(Config.HeadlightIntensity.Value, LightUnit.Lumen);
-//        _hdData.SetSpotAngle(Config.SpotAngle.Value);
-//        _hdData.innerSpotPercent = Config.InnerSpotlightPercent.Value;
-//        _hdData.UpdateAllLightValues();
-//    }
-//}
+[HarmonyPatch(typeof(PlayerGolfCartDriverAction), nameof(PlayerGolfCartDriverAction.TriggerDisconnect))]
+public static class GolfCart_Exit_Patch
+{
+    [HarmonyPostfix]
+    public static void Postfix()
+    {
+        BetterGolfCartManager.LocalPlayerCart = null;
+        Msg("LocalPlayerCart ontkoppeld.");
+    }
+}
 
 public class BetterGolfCartManager
 {
@@ -217,29 +184,9 @@ public class BetterGolfCartManager
         customLight.localRotation = Quaternion.Euler(0, steeringAngle * steeringAngleLightImpactFactor, 0);
     }
 
-    public static void RegisterLocalPlayerGolfCart()
-    {
-        foreach (var cart in ActiveCarts)
-        {
-
-            if (!cart.VerifyDriverIsLocalPlayer(LocalPlayer.Entity)) continue; // Only grab the cart which the player is driving
-
-            LocalPlayerCart = cart;
-        }
-    }
-
     public static void Update()
     {
-        if (LocalPlayer.IsInGolfCart)
-        {
-            Msg("Player is in golf cart");
-            RegisterLocalPlayerGolfCart();
-            AdjustLightAngleBasedOnSteering();
-        }
-        if (!LocalPlayer.IsInGolfCart)
-        {
-            LocalPlayerCart = null;
-        }
+        AdjustLightAngleBasedOnSteering();
         ActiveCarts.RemoveAll(cart => cart == null);
     }
 }
