@@ -21,6 +21,7 @@
           "Sons.Construction": "0.0.0.0",
           "Sons.Construction.Utils": "0.0.0.0",
           "Sons": "0.0.0.0",
+          "Sons.Electricity": "0.0.0.0",
           "Sons.Gui": "0.0.0.0",
           "Sons.Item": "0.0.0.0",
           "Sons.Multiplayer": "0.0.0.0",
@@ -138,6 +139,14 @@
       "Sons/0.0.0.0": {
         "runtime": {
           "Sons.dll": {
+            "assemblyVersion": "0.0.0.0",
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
+      "Sons.Electricity/0.0.0.0": {
+        "runtime": {
+          "Sons.Electricity.dll": {
             "assemblyVersion": "0.0.0.0",
             "fileVersion": "0.0.0.0"
           }
@@ -807,14 +816,6 @@
           }
         }
       },
-      "Sons.Electricity/0.0.0.0": {
-        "runtime": {
-          "Sons.Electricity.dll": {
-            "assemblyVersion": "0.0.0.0",
-            "fileVersion": "0.0.0.0"
-          }
-        }
-      },
       "Obi/0.0.0.0": {
         "runtime": {
           "Obi.dll": {
@@ -1400,6 +1401,11 @@
       "serviceable": false,
       "sha512": ""
     },
+    "Sons.Electricity/0.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
     "Sons.Gui/0.0.0.0": {
       "type": "reference",
       "serviceable": false,
@@ -1811,11 +1817,6 @@
       "sha512": ""
     },
     "Sons.Settings/0.0.0.0": {
-      "type": "reference",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "Sons.Electricity/0.0.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""

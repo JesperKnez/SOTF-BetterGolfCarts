@@ -1,14 +1,11 @@
 ﻿using HarmonyLib;
-using Sons;
 using Sons.Gameplay;
+using Sons.Electricity;
 using SonsSdk;
 using SUI;
 using UnityEngine;
 using UnityEngine.Rendering.HighDefinition;
-using Il2CppInterop.Runtime;
 using static RedLoader.RLog;
-using Il2CppInterop.Runtime.Injection;
-using TheForest.Utils;
 
 namespace BetterGolfCarts;
 
@@ -188,5 +185,36 @@ public class BetterGolfCartManager
     {
         AdjustLightAngleBasedOnSteering();
         ActiveCarts.RemoveAll(cart => cart == null);
+    }
+}
+
+
+[HarmonyPatch(typeof(GolfCartController), "ApplyForces", typeof(float), typeof(float), typeof(float), typeof(bool))]
+public class HandbrakePatch
+{
+    private static bool _handbrakeEngaged = false;
+
+    public static void toggleHandbrake()
+    {
+        Msg("Toggling handbrake. Current state: " + _handbrakeEngaged);
+        _handbrakeEngaged = !_handbrakeEngaged;
+    }
+    public static void Prefix(ref bool handBrake)
+    {
+        handBrake = _handbrakeEngaged;
+        if (BetterGolfCartManager.LocalPlayerCart == null) return;
+        {
+            Msg("Handbrake state applied to cart: " + handBrake);
+            
+            BatteryIndicator batteryIndicator = BetterGolfCartManager.LocalPlayerCart.GetComponentInChildren<BatteryIndicator>();
+
+            if (_handbrakeEngaged)
+            {
+                batteryIndicator?.SetSegmentColor(new Color(1f, 0f, 0f, 1f));
+            } else
+            {
+                batteryIndicator?.SetSegmentColor(new Color(0f, 1f, 0f, 1f)); // should be set to 0 1 0 1 (default from game)
+            }
+        }
     }
 }

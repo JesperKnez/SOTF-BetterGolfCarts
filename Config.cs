@@ -1,5 +1,6 @@
 using RedLoader;
 using RedLoader.Preferences;
+using Sons.Gameplay;
 using SonsSdk;
 using SonsSdk.Attributes;
 using SUI;
@@ -18,6 +19,9 @@ public static class Config
     public static ConfigEntry<float> HeadlightIntensity { get; private set; }
 
     public static KeybindConfigEntry Highbeams { get; private set; }
+
+    public static KeybindConfigEntry Handbrake { get; private set; }
+
 
 
     //public static ConfigEntry<bool> SomeEntry { get; private set; }
@@ -40,6 +44,9 @@ public static class Config
 
         Highbeams = Category.CreateKeybindEntry("HighbeamsKeybind", EInputKey.h, "Highbeams keybind", "Enable the highbeams");
         Highbeams.Notify(BetterGolfCartManager.ToggleHighBeams);
+
+        Handbrake = Category.CreateKeybindEntry("HandbrakeKeybind", EInputKey.p, "Handbrake key bind", "Engage the parking brake");
+        Handbrake.Notify(HandbrakePatch.toggleHandbrake);
     }
 
     // Same as the callback in "CreateSettings". Called when the settings ui is closed.
@@ -47,3 +54,5 @@ public static class Config
     {
     }
 }
+
+
