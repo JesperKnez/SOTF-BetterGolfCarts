@@ -30,6 +30,7 @@
           "UnityEngine.AssetBundleModule": "0.0.0.0",
           "UnityEngine.CoreModule": "0.0.0.0",
           "UnityEngine": "0.0.0.0",
+          "UnityEngine.ImageConversionModule": "0.0.0.0",
           "UnityEngine.InputLegacyModule": "0.0.0.0",
           "UnityEngine.InputModule": "0.0.0.0",
           "UnityEngine.PhysicsModule": "0.0.0.0",
@@ -211,6 +212,14 @@
       "UnityEngine/0.0.0.0": {
         "runtime": {
           "UnityEngine.dll": {
+            "assemblyVersion": "0.0.0.0",
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
+      "UnityEngine.ImageConversionModule/0.0.0.0": {
+        "runtime": {
+          "UnityEngine.ImageConversionModule.dll": {
             "assemblyVersion": "0.0.0.0",
             "fileVersion": "0.0.0.0"
           }
@@ -1442,6 +1451,11 @@
       "sha512": ""
     },
     "UnityEngine/0.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "UnityEngine.ImageConversionModule/0.0.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""

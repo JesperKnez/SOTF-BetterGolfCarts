@@ -22,6 +22,12 @@ public static class Config
 
     public static KeybindConfigEntry Handbrake { get; private set; }
 
+    public static KeybindConfigEntry Boost { get; private set; }
+
+    public static ConfigEntry<float> BoostMultiplier { get; private set; }
+
+
+
 
 
     //public static ConfigEntry<bool> SomeEntry { get; private set; }
@@ -46,7 +52,13 @@ public static class Config
         Highbeams.Notify(BetterGolfCartManager.ToggleHighBeams);
 
         Handbrake = Category.CreateKeybindEntry("HandbrakeKeybind", EInputKey.p, "Handbrake key bind", "Engage the parking brake");
-        Handbrake.Notify(HandbrakePatch.toggleHandbrake);
+        Handbrake.Notify(InactiveGolfCartFeaturesPatch.toggleHandbrake);
+
+        Boost = Category.CreateKeybindEntry("BoostKeybind", EInputKey.l, "Boost key bind", "Engage the boost");
+        Boost.Notify(InactiveGolfCartFeaturesPatch.toggleBoost);
+
+        BoostMultiplier = Category.CreateEntry("BoostMultiplier", 3f, "Boost strength", "Controls the power of the turbo");
+        BoostMultiplier.SetRange(1.0f, 10f);
     }
 
     // Same as the callback in "CreateSettings". Called when the settings ui is closed.
