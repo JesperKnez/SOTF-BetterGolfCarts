@@ -1,11 +1,14 @@
 ﻿using HarmonyLib;
+using RedLoader;
+using PathologicalGames;
 using Sons.Gameplay;
-using Sons.Electricity;
 using SonsSdk;
 using SUI;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.Rendering.HighDefinition;
-using static RedLoader.RLog;
+using UnityEngine.UI;
+using static RedLoader. RLog;
 
 namespace BetterGolfCarts;
 
@@ -55,36 +58,32 @@ public class GolfCartCustomLightPatch
         Transform lightsGroup = __instance.transform.Find("LightsGroup");
         if (lightsGroup == null) return;
 
-        // 1. Schakel de originele lichten uit (zonder ze te verwijderen)
-        // Zo blijven de 'scripts' van de game op de achtergrond draaien zonder visueel effect.
         foreach (var oldLight in lightsGroup.GetComponentsInChildren<Light>(true))
         {
             UnityEngine.Object.Destroy(oldLight);
         }
 
-        // 3. Nieuw licht maken
         GameObject myLightObj = new GameObject("BetterGolfCarts_CustomHeadlight");
         myLightObj.transform.SetParent(lightsGroup, false);
 
         Light newLight = myLightObj.AddComponent<Light>();
         HDAdditionalLightData hdData = myLightObj.AddComponent<HDAdditionalLightData>();
 
-        // 4. Basis instellingen (Startpunt voor het tunen)
         newLight.type = LightType.Spot;
         newLight.shadows = LightShadows.None;
 
 
-        hdData.SetSpotAngle(Config.SpotAngle.Value);      // Breedte van de bundel
-        hdData.innerSpotPercent = Config.InnerSpotlightPercent.Value;  // Zachtheid van de rand (lager = zachter)
-        hdData.shapeRadius = 1f;      // Grootte van de lamp (voor zachte schaduw)
+        hdData.SetSpotAngle(Config.SpotAngle.Value);
+        hdData.innerSpotPercent = Config.InnerSpotlightPercent.Value;
+        hdData.shapeRadius = 1f;
         hdData.SetIntensity(Config.HeadlightIntensity.Value, LightUnit.Lumen);
         hdData.SetRange(200f);
-        hdData.UpdateAllLightValues(); //
+        hdData.UpdateAllLightValues();
 
     }
 }
 
-[HarmonyPatch(typeof(GolfCartController), "Start")] // Of Awake
+[HarmonyPatch(typeof(GolfCartController), "Start")]
 public static class GolfCartController_Start_Patch
 {
     [HarmonyPostfix]
@@ -103,7 +102,7 @@ public static class GolfCart_Entry_Patch
         if (__0 != null)
         {
             BetterGolfCartManager.LocalPlayerCart = __0;
-            Msg("LocalPlayerCart succesvol geregistreerd via PlayerGolfCartDriverAction!");
+            BetterGolfCartManager.SetMaxBrakeTorque(__0, Config.MaxBrakeTorque.Value);
         }
     }
 }
@@ -115,7 +114,6 @@ public static class GolfCart_Exit_Patch
     public static void Postfix()
     {
         BetterGolfCartManager.LocalPlayerCart = null;
-        Msg("LocalPlayerCart ontkoppeld.");
     }
 }
 
@@ -126,7 +124,7 @@ public class BetterGolfCartManager
 
     public static GolfCartController LocalPlayerCart = null;
 
-    private static string testString = "JustForTesting";
+    public static GameObject? CurrentMessageObj = null;
 
     public static void RegisterCart(GolfCartController cart)
     {
@@ -134,34 +132,35 @@ public class BetterGolfCartManager
         if (!ActiveCarts.Contains(cart))
         {
             ActiveCarts.Add(cart);
-            // Hier kun je eventueel ook direct je licht-logica aanroepen
+
+            DrawParkingBrakeIcon(cart);
         }
     }
 
     public static void ToggleHighBeams()
     {
-            if(LocalPlayerCart == null) return;
-            Transform lightsGroup = LocalPlayerCart.transform.Find("LightsGroup");
-            if (lightsGroup == null) return;
-            var customLight = lightsGroup.Find("BetterGolfCarts_CustomHeadlight");
-            if (customLight == null) return;
-            var hdData = customLight.GetComponent<HDAdditionalLightData>();
-            if (hdData == null) return;
-            // Toggle logic
-            if (hdData.intensity == Config.HeadlightIntensity.Value)
-            {
-                // Enable high beams
-                hdData.SetIntensity(Config.HeadlightIntensity.Value * 4, LightUnit.Lumen);
-                hdData.SetSpotAngle(60f);
-            }
-            else
-            {
-                // Disable high beams
-                hdData.SetIntensity(Config.HeadlightIntensity.Value, LightUnit.Lumen);
-                hdData.SetSpotAngle(Config.SpotAngle.Value);
-                hdData.innerSpotPercent = Config.InnerSpotlightPercent.Value;
-            }
-            hdData.UpdateAllLightValues();
+        if (LocalPlayerCart == null) return;
+        Transform lightsGroup = LocalPlayerCart.transform.Find("LightsGroup");
+        if (lightsGroup == null) return;
+        var customLight = lightsGroup.Find("BetterGolfCarts_CustomHeadlight");
+        if (customLight == null) return;
+        var hdData = customLight.GetComponent<HDAdditionalLightData>();
+        if (hdData == null) return;
+        // Toggle logic
+        if (hdData.intensity == Config.HeadlightIntensity.Value)
+        {
+            // Enable high beams
+            hdData.SetIntensity(Config.HeadlightIntensity.Value * 4, LightUnit.Lumen);
+            hdData.SetSpotAngle(60f);
+        }
+        else
+        {
+            // Disable high beams
+            hdData.SetIntensity(Config.HeadlightIntensity.Value, LightUnit.Lumen);
+            hdData.SetSpotAngle(Config.SpotAngle.Value);
+            hdData.innerSpotPercent = Config.InnerSpotlightPercent.Value;
+        }
+        hdData.UpdateAllLightValues();
     }
 
     public static void AdjustLightAngleBasedOnSteering()
@@ -169,7 +168,7 @@ public class BetterGolfCartManager
         if (LocalPlayerCart == null) return;
         float steeringAngle = LocalPlayerCart._steeringAngle;
 
-        float steeringAngleLightImpactFactor = 0.5f; // Hoeveel invloed het sturen heeft op de lichthoek
+        float steeringAngleLightImpactFactor = 0.5f;
 
         Transform lightsGroup = LocalPlayerCart.transform.Find("LightsGroup");
         if (lightsGroup == null) return;
@@ -177,8 +176,13 @@ public class BetterGolfCartManager
 
         if (customLight == null) return;
 
-        // Pas de rotatie van het licht aan op basis van de stuurhoek
         customLight.localRotation = Quaternion.Euler(0, steeringAngle * steeringAngleLightImpactFactor, 0);
+    }
+
+    public static void SetMaxBrakeTorque(GolfCartController cart, float torque)
+    {
+        if (cart == null) return;
+        cart._definition.MaxBrakeTorque = torque;
     }
 
     public static void Update()
@@ -186,35 +190,170 @@ public class BetterGolfCartManager
         AdjustLightAngleBasedOnSteering();
         ActiveCarts.RemoveAll(cart => cart == null);
     }
+
+    public static void DrawParkingBrakeIcon(GolfCartController cart)
+    {
+        Transform gpsCanvasTransform = cart.transform.Find("GolfCartScreen/GolfCartGps/Canvas");
+
+        if (gpsCanvasTransform != null)
+        {
+            GameObject redBlock = new GameObject("Handbrake_RedIndicator");
+
+            redBlock.transform.SetParent(gpsCanvasTransform, false);
+
+            redBlock.layer = 5;
+
+            Image img = redBlock.AddComponent<Image>();
+
+            string assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string imagePath = Path.Combine(assemblyDir, "BetterGolfCarts", "handbrake_icon.png");
+
+            if (File.Exists(imagePath))
+            {
+                img.sprite = LoadSprite(imagePath);
+            }
+            else 
+            {
+                Msg($"FOUT: Afbeelding niet gevonden op {imagePath}");
+            }
+            img.color = Color.white; 
+
+            RectTransform rect = redBlock.GetComponent<RectTransform>();
+
+            rect.sizeDelta = new Vector2(1.5f, 1.5f);
+
+            rect.anchorMin = new Vector2(1, 1);
+            rect.anchorMax = new Vector2(1, 1);
+
+            rect.pivot = new Vector2(1, 1);
+
+            rect.anchoredPosition = new Vector2(-0.5f, -0.5f);
+        }
+    }
+
+    public static void ClearMessage(GameObject msgObj)
+    {
+        if (msgObj == null)
+        {
+            return;
+        }
+
+        try
+        {
+            if (msgObj.GetComponent<BoostMessageMarker>() != null)
+            {
+                msgObj.SetActive(false);
+
+                if (PoolManager.Pools.ContainsKey("misc"))
+                {
+                    PoolManager.Pools["misc"].Despawn(msgObj.transform);
+                }
+
+                BetterGolfCartManager.CurrentMessageObj = null;
+            }
+        }
+        catch (System.Exception e)
+        {
+             RLog.Error("Fout bij verwijderen: " + e.Message);
+        }
+    }
+
+    public static Sprite LoadSprite(string filePath)
+    {
+        if (!File.Exists(filePath)) return null;
+
+        byte[] fileData = File.ReadAllBytes(filePath);
+        Texture2D tex = new Texture2D(2, 2);
+        tex.filterMode = FilterMode.Bilinear;
+        if (ImageConversion.LoadImage(tex, fileData))
+        {
+            return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
+        }
+        return null;
+    }
 }
 
 
 [HarmonyPatch(typeof(GolfCartController), "ApplyForces", typeof(float), typeof(float), typeof(float), typeof(bool))]
-public class HandbrakePatch
+public class InactiveGolfCartFeaturesPatch
 {
     private static bool _handbrakeEngaged = false;
+    private static bool _boostActive = false;
 
     public static void toggleHandbrake()
     {
-        Msg("Toggling handbrake. Current state: " + _handbrakeEngaged);
         _handbrakeEngaged = !_handbrakeEngaged;
     }
-    public static void Prefix(ref bool handBrake)
+
+    public static void toggleBoost()
+    {
+        _boostActive = !_boostActive;
+        if (BetterGolfCartManager.LocalPlayerCart == null) return;
+
+        if (_boostActive)
+        {
+            SonsTools.ShowMessage("Boost Engaged!", 99999999f);
+
+            return;
+        }
+        // Alleen verwijderen als we ook daadwerkelijk een bericht-object hebben
+        if (BetterGolfCartManager.CurrentMessageObj != null && !_boostActive)
+        {
+            BetterGolfCartManager.ClearMessage(BetterGolfCartManager.CurrentMessageObj);
+        }
+    }
+    public static void Prefix(GolfCartController __instance, ref bool handBrake)
     {
         handBrake = _handbrakeEngaged;
         if (BetterGolfCartManager.LocalPlayerCart == null) return;
-        {
-            Msg("Handbrake state applied to cart: " + handBrake);
-            
-            BatteryIndicator batteryIndicator = BetterGolfCartManager.LocalPlayerCart.GetComponentInChildren<BatteryIndicator>();
 
-            if (_handbrakeEngaged)
-            {
-                batteryIndicator?.SetSegmentColor(new Color(1f, 0f, 0f, 1f));
-            } else
-            {
-                batteryIndicator?.SetSegmentColor(new Color(0f, 1f, 0f, 1f)); // should be set to 0 1 0 1 (default from game)
-            }
+        //BatteryIndicator batteryIndicator = BetterGolfCartManager.LocalPlayerCart.GetComponentInChildren<BatteryIndicator>();
+
+        Transform gpsCanvasTransform = BetterGolfCartManager.LocalPlayerCart.transform.Find("GolfCartScreen/GolfCartGps/Canvas");
+
+        if (gpsCanvasTransform)
+        {
+            Transform handbrakeIndicatorTransform = gpsCanvasTransform.Find("Handbrake_RedIndicator");
+
+            if (handbrakeIndicatorTransform == null) return;
+
+            GameObject handbrakeIndicatorObj = handbrakeIndicatorTransform.gameObject;
+
+            handbrakeIndicatorObj.SetActive(_handbrakeEngaged);
         }
+
+        //if (_handbrakeEngaged)
+        //{
+        //    batteryIndicator?.SetSegmentColor(new Color(1f, 0f, 0f, 1f));
+        //}
+        //else
+        //{
+        //    batteryIndicator?.SetSegmentColor(new Color(0f, 1f, 0f, 1f)); // should be set to 0 1 0 1 (default from game)
+        //}
+
+        __instance.SetBoosting(_boostActive);
+        __instance._boostInput = _boostActive;
+        __instance._definition.TorqueCurveBoostMultiplier = Config.BoostMultiplier.Value;
+
+    }
+}
+
+[RegisterTypeInIl2Cpp]
+public class BoostMessageMarker : MonoBehaviour
+{
+    // Deze klasse fungeert als een marker om berichten van de handrem te identificeren.
+}
+
+[HarmonyPatch(typeof(HudGui), "SpawnTimedGameObject")]
+public class HudGuiSpawnTimedPatch
+{
+    public static void Postfix(GameObject go)
+    {
+        if (go.GetComponent<BoostMessageMarker>() != null) return;
+        // Voeg je eigen component toe als uniek kenmerk
+        go.AddComponent<BoostMessageMarker>();
+
+        // Sla de referentie op voor later
+        BetterGolfCartManager.CurrentMessageObj = go;
     }
 }
