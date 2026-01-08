@@ -26,6 +26,8 @@ public static class Config
 
     public static ConfigEntry<float> BoostMultiplier { get; private set; }
 
+    public static ConfigEntry<float> MaxBrakeTorque { get; private set; }
+
 
 
 
@@ -57,8 +59,11 @@ public static class Config
         Boost = Category.CreateKeybindEntry("BoostKeybind", EInputKey.l, "Boost key bind", "Engage the boost");
         Boost.Notify(InactiveGolfCartFeaturesPatch.toggleBoost);
 
-        BoostMultiplier = Category.CreateEntry("BoostMultiplier", 3f, "Boost strength", "Controls the power of the turbo");
+        BoostMultiplier = Category.CreateEntry("BoostMultiplier", 4f, "Boost strength", "Controls the power of the turbo (1 disables it)");
         BoostMultiplier.SetRange(1.0f, 10f);
+
+        MaxBrakeTorque = Category.CreateEntry("MaxBrakeTorque", 800f, "Max Brake Torque", "Controls the maximum braking force applied to the wheels.");
+        MaxBrakeTorque.SetRange(200f, 2000f);
     }
 
     // Same as the callback in "CreateSettings". Called when the settings ui is closed.

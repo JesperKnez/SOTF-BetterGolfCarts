@@ -1,14 +1,14 @@
 ﻿using HarmonyLib;
-using Sons.Electricity;
+using RedLoader;
+using PathologicalGames;
 using Sons.Gameplay;
 using SonsSdk;
 using SUI;
-using System.IO;
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.Rendering.HighDefinition;
-using static RedLoader.RLog;
 using System.Reflection;
+using UnityEngine;
+using UnityEngine.Rendering.HighDefinition;
+using UnityEngine.UI;
+using static RedLoader. RLog;
 
 namespace BetterGolfCarts;
 
@@ -78,7 +78,7 @@ public class GolfCartCustomLightPatch
         hdData.shapeRadius = 1f;
         hdData.SetIntensity(Config.HeadlightIntensity.Value, LightUnit.Lumen);
         hdData.SetRange(200f);
-        hdData.UpdateAllLightValues(); //
+        hdData.UpdateAllLightValues();
 
     }
 }
@@ -102,6 +102,7 @@ public static class GolfCart_Entry_Patch
         if (__0 != null)
         {
             BetterGolfCartManager.LocalPlayerCart = __0;
+            BetterGolfCartManager.SetMaxBrakeTorque(__0, Config.MaxBrakeTorque.Value);
         }
     }
 }
@@ -123,7 +124,7 @@ public class BetterGolfCartManager
 
     public static GolfCartController LocalPlayerCart = null;
 
-    private static string testString = "JustForTesting";
+    public static GameObject? CurrentMessageObj = null;
 
     public static void RegisterCart(GolfCartController cart)
     {
@@ -167,7 +168,7 @@ public class BetterGolfCartManager
         if (LocalPlayerCart == null) return;
         float steeringAngle = LocalPlayerCart._steeringAngle;
 
-        float steeringAngleLightImpactFactor = 0.5f; // Hoeveel invloed het sturen heeft op de lichthoek
+        float steeringAngleLightImpactFactor = 0.5f;
 
         Transform lightsGroup = LocalPlayerCart.transform.Find("LightsGroup");
         if (lightsGroup == null) return;
@@ -175,8 +176,13 @@ public class BetterGolfCartManager
 
         if (customLight == null) return;
 
-        // Pas de rotatie van het licht aan op basis van de stuurhoek
         customLight.localRotation = Quaternion.Euler(0, steeringAngle * steeringAngleLightImpactFactor, 0);
+    }
+
+    public static void SetMaxBrakeTorque(GolfCartController cart, float torque)
+    {
+        if (cart == null) return;
+        cart._definition.MaxBrakeTorque = torque;
     }
 
     public static void Update()
@@ -225,6 +231,33 @@ public class BetterGolfCartManager
         }
     }
 
+    public static void ClearMessage(GameObject msgObj)
+    {
+        if (msgObj == null)
+        {
+            return;
+        }
+
+        try
+        {
+            if (msgObj.GetComponent<BoostMessageMarker>() != null)
+            {
+                msgObj.SetActive(false);
+
+                if (PoolManager.Pools.ContainsKey("misc"))
+                {
+                    PoolManager.Pools["misc"].Despawn(msgObj.transform);
+                }
+
+                BetterGolfCartManager.CurrentMessageObj = null;
+            }
+        }
+        catch (System.Exception e)
+        {
+             RLog.Error("Fout bij verwijderen: " + e.Message);
+        }
+    }
+
     public static Sprite LoadSprite(string filePath)
     {
         if (!File.Exists(filePath)) return null;
@@ -259,12 +292,14 @@ public class InactiveGolfCartFeaturesPatch
 
         if (_boostActive)
         {
-            SonsTools.ShowMessage("Boost Engaged!", 2f); 
+            SonsTools.ShowMessage("Boost Engaged!", 99999999f);
 
-            // ShowMessage is a wrapper around HudGui.DisplayGeneralMessage()
-            // DisplayGeneralMessage seems to add the message to a collection of some sort, PoolManagar.Pools["misc"]
-            // What this means is that we should be able to set a really long duration, and then manually clear it from the pool.
             return;
+        }
+        // Alleen verwijderen als we ook daadwerkelijk een bericht-object hebben
+        if (BetterGolfCartManager.CurrentMessageObj != null && !_boostActive)
+        {
+            BetterGolfCartManager.ClearMessage(BetterGolfCartManager.CurrentMessageObj);
         }
     }
     public static void Prefix(GolfCartController __instance, ref bool handBrake)
@@ -303,3 +338,22 @@ public class InactiveGolfCartFeaturesPatch
     }
 }
 
+[RegisterTypeInIl2Cpp]
+public class BoostMessageMarker : MonoBehaviour
+{
+    // Deze klasse fungeert als een marker om berichten van de handrem te identificeren.
+}
+
+[HarmonyPatch(typeof(HudGui), "SpawnTimedGameObject")]
+public class HudGuiSpawnTimedPatch
+{
+    public static void Postfix(GameObject go)
+    {
+        if (go.GetComponent<BoostMessageMarker>() != null) return;
+        // Voeg je eigen component toe als uniek kenmerk
+        go.AddComponent<BoostMessageMarker>();
+
+        // Sla de referentie op voor later
+        BetterGolfCartManager.CurrentMessageObj = go;
+    }
+}

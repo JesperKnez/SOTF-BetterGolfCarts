@@ -17,11 +17,11 @@
           "Il2CppInterop.Generator": "1.4.6.0",
           "Il2CppInterop.Runtime": "1.4.6.0",
           "Il2Cppmscorlib": "4.0.0.0",
+          "PathologicalGames": "0.0.0.0",
           "RedLoader": "0.8.6.0",
           "Sons.Construction": "0.0.0.0",
           "Sons.Construction.Utils": "0.0.0.0",
           "Sons": "0.0.0.0",
-          "Sons.Electricity": "0.0.0.0",
           "Sons.Gui": "0.0.0.0",
           "Sons.Item": "0.0.0.0",
           "Sons.Multiplayer": "0.0.0.0",
@@ -113,6 +113,14 @@
           }
         }
       },
+      "PathologicalGames/0.0.0.0": {
+        "runtime": {
+          "PathologicalGames.dll": {
+            "assemblyVersion": "0.0.0.0",
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
       "RedLoader/0.8.6.0": {
         "runtime": {
           "RedLoader.dll": {
@@ -140,14 +148,6 @@
       "Sons/0.0.0.0": {
         "runtime": {
           "Sons.dll": {
-            "assemblyVersion": "0.0.0.0",
-            "fileVersion": "0.0.0.0"
-          }
-        }
-      },
-      "Sons.Electricity/0.0.0.0": {
-        "runtime": {
-          "Sons.Electricity.dll": {
             "assemblyVersion": "0.0.0.0",
             "fileVersion": "0.0.0.0"
           }
@@ -305,6 +305,22 @@
           }
         }
       },
+      "UnityEngine.AudioModule/0.0.0.0": {
+        "runtime": {
+          "UnityEngine.AudioModule.dll": {
+            "assemblyVersion": "0.0.0.0",
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
+      "UnityEngine.ParticleSystemModule/0.0.0.0": {
+        "runtime": {
+          "UnityEngine.ParticleSystemModule.dll": {
+            "assemblyVersion": "0.0.0.0",
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
       "MonoMod.Utils/22.7.31.1": {
         "runtime": {
           "MonoMod.Utils.dll": {
@@ -441,14 +457,6 @@
           }
         }
       },
-      "UnityEngine.ParticleSystemModule/0.0.0.0": {
-        "runtime": {
-          "UnityEngine.ParticleSystemModule.dll": {
-            "assemblyVersion": "0.0.0.0",
-            "fileVersion": "0.0.0.0"
-          }
-        }
-      },
       "Unity.TextMeshPro/0.0.0.0": {
         "runtime": {
           "Unity.TextMeshPro.dll": {
@@ -532,14 +540,6 @@
       "DigitalRuby.ProceduralLightning/0.0.0.0": {
         "runtime": {
           "DigitalRuby.ProceduralLightning.dll": {
-            "assemblyVersion": "0.0.0.0",
-            "fileVersion": "0.0.0.0"
-          }
-        }
-      },
-      "PathologicalGames/0.0.0.0": {
-        "runtime": {
-          "PathologicalGames.dll": {
             "assemblyVersion": "0.0.0.0",
             "fileVersion": "0.0.0.0"
           }
@@ -820,6 +820,14 @@
       "Sons.Settings/0.0.0.0": {
         "runtime": {
           "Sons.Settings.dll": {
+            "assemblyVersion": "0.0.0.0",
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
+      "Sons.Electricity/0.0.0.0": {
+        "runtime": {
+          "Sons.Electricity.dll": {
             "assemblyVersion": "0.0.0.0",
             "fileVersion": "0.0.0.0"
           }
@@ -1121,14 +1129,6 @@
           }
         }
       },
-      "UnityEngine.AudioModule/0.0.0.0": {
-        "runtime": {
-          "UnityEngine.AudioModule.dll": {
-            "assemblyVersion": "0.0.0.0",
-            "fileVersion": "0.0.0.0"
-          }
-        }
-      },
       "Il2CppSystem.IO.Compression/4.0.0.0": {
         "runtime": {
           "Il2CppSystem.IO.Compression.dll": {
@@ -1390,6 +1390,11 @@
       "serviceable": false,
       "sha512": ""
     },
+    "PathologicalGames/0.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
     "RedLoader/0.8.6.0": {
       "type": "reference",
       "serviceable": false,
@@ -1406,11 +1411,6 @@
       "sha512": ""
     },
     "Sons/0.0.0.0": {
-      "type": "reference",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "Sons.Electricity/0.0.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
@@ -1510,6 +1510,16 @@
       "serviceable": false,
       "sha512": ""
     },
+    "UnityEngine.AudioModule/0.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "UnityEngine.ParticleSystemModule/0.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
     "MonoMod.Utils/22.7.31.1": {
       "type": "reference",
       "serviceable": false,
@@ -1595,11 +1605,6 @@
       "serviceable": false,
       "sha512": ""
     },
-    "UnityEngine.ParticleSystemModule/0.0.0.0": {
-      "type": "reference",
-      "serviceable": false,
-      "sha512": ""
-    },
     "Unity.TextMeshPro/0.0.0.0": {
       "type": "reference",
       "serviceable": false,
@@ -1651,11 +1656,6 @@
       "sha512": ""
     },
     "DigitalRuby.ProceduralLightning/0.0.0.0": {
-      "type": "reference",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "PathologicalGames/0.0.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
@@ -1831,6 +1831,11 @@
       "sha512": ""
     },
     "Sons.Settings/0.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Sons.Electricity/0.0.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
@@ -2016,11 +2021,6 @@
       "sha512": ""
     },
     "UnityEngine.TextCoreFontEngineModule/0.0.0.0": {
-      "type": "reference",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "UnityEngine.AudioModule/0.0.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
